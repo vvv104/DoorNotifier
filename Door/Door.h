@@ -13,7 +13,7 @@ class Door : public DoorHandler, public PulseHandler, public ModemHandler
 public:
   Door()
   : r(new Led(Led::Red)), g(new Led(Led::Green)), b(new Led(Led::Blue))
-  , hi(new Beeper(7040, 100)), low(new Beeper(2000, 100))
+  , hi(new Beeper(7040)), low(new Beeper(2000))
   , lock(this)
   , timer(this)
   , modem(this)
@@ -27,7 +27,7 @@ public:
     Serial.begin(9600);
     modem.Start();
     r.Start(4, 100, 1900);
-    hi.Start(4, 2000);
+    hi.Start(1, 100);
     buf_[COM_BUF_LEN] = 0;
   }
 
@@ -37,6 +37,7 @@ public:
     timer.Step();
     r.Step();
     hi.Step();
+    low.Step();
     ProcessSerial();
   }
 
@@ -91,22 +92,28 @@ public:
     }
   }
 
-  void OnCommand(const char* data)
+  void OnCommand(const String& data)
   {
     Serial.print("Command: \'");
     Serial.print(data);
     Serial.println("\'");
+    if (data.equalsIgnoreCase("open"))
+      lock.Open();
+    else if (data.equalsIgnoreCase("close"))
+      lock.Close();
   }
 
   // DoorHandler interface
 
   virtual void OnOpen()
   {
+    low.Start(0, 100, 900);
     timer.Start(1, 1000 * 60 * 5);
   }
 
   virtual void OnClose()
   {
+    low.Stop();
     timer.Stop();
   }
 
@@ -114,17 +121,18 @@ public:
 
   virtual void Init()
   {
+    Log("door->init");
     
   }
   
   virtual void Action()
   {
-    
+    Log("door->action");
   }
   
   virtual void Finish()
   {
-    
+    Log("door->finish");
   }
 
   // ModemHandler interface

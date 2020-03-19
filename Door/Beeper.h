@@ -5,20 +5,25 @@
 class Beeper : public PulseHandler
 {
 public:
-  Beeper(unsigned int freq, unsigned long dur)
+  Beeper(unsigned int freq)
   : freq_(freq)
-  , dur_(dur)
+  , status_(false)
   {
   }
 
   virtual void Init()
   {
-    tone(pin_, freq_, dur_);
+    status_ = true;
+    tone(pin_, freq_);
   }
   
   virtual void Action()
   {
-    tone(pin_, freq_, dur_);
+    status_ = !status_;
+    if (status_)
+      tone(pin_, freq_);
+    else
+      noTone(pin_);
   }
   
   virtual void Finish()
@@ -28,7 +33,7 @@ public:
 
 private:
   unsigned int freq_;
-  unsigned long dur_;
+  bool status_;
   static const uint8_t pin_;
 };
 
