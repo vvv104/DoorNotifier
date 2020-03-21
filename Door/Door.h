@@ -34,6 +34,7 @@ public:
 #ifdef DEBUG
     Serial.begin(9600);
 #endif
+    lock.Start();
     modem.Start();
     //g.Start();
     hi.Start(1, 100);
@@ -41,6 +42,7 @@ public:
 
   void Step()
   {
+    lock.Step();
     modem.Step();
     timer.Step();
     r.Step();

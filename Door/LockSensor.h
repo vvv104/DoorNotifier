@@ -13,9 +13,29 @@ public:
   LockSensor(DoorHandler* handler)
   : handler_(handler)
   , isOpen_(false)
+  , last_(0)
   {
   }
 
+  void Start()
+  {
+    last_ = millis();
+  }
+
+  void Step()
+  {
+    const unsigned long current = millis();
+
+    if (last_ + timeout_ > current)
+      return;
+
+    last_ = current;
+
+    const int sensorValue = analogRead(pin_);
+    Serial.print("Hall Sensor = " );
+    Serial.println(sensorValue);
+  }
+  
   void Open()
   {
     isOpen_ = true;
@@ -36,4 +56,10 @@ public:
 private:
   DoorHandler* handler_;
   bool isOpen_;
+  unsigned long last_;
+  static const uint8_t pin_;
+  static const unsigned int timeout_;
 };
+
+static const uint8_t LockSensor::pin_ = A3;
+static const unsigned int LockSensor::timeout_ = 1000;
