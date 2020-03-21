@@ -6,7 +6,9 @@
 #include "Modem.h"
 #include "LockSensor.h"
 
+#ifdef DEBUG
 #define COM_BUF_LEN 31
+#endif
 
 class Door : public DoorHandler, public PulseHandler, public ModemHandler
 {
@@ -17,18 +19,24 @@ public:
   , lock(this)
   , timer(this)
   , modem(this)
+#ifdef DEBUG
   , sendingToModem(false)
   , pos_(0)
+#endif
   {
+#ifdef DEBUG
+    buf_[COM_BUF_LEN] = 0;
+#endif
   }
 
   void Start()
   {
+#ifdef DEBUG
     Serial.begin(9600);
+#endif
     modem.Start();
-    r.Start(4, 100, 1900);
+    //g.Start();
     hi.Start(1, 100);
-    buf_[COM_BUF_LEN] = 0;
   }
 
   void Step()
@@ -36,11 +44,16 @@ public:
     modem.Step();
     timer.Step();
     r.Step();
+    g.Step();
+    b.Step();
     hi.Step();
     low.Step();
+#ifdef DEBUG
     ProcessSerial();
+#endif
   }
 
+#ifdef DEBUG
   void ProcessSerial()
   {
     int data;
@@ -94,21 +107,19 @@ public:
 
   void OnCommand(const String& data)
   {
-    Serial.print("Command: \'");
-    Serial.print(data);
-    Serial.println("\'");
     if (data.equalsIgnoreCase("open"))
       lock.Open();
     else if (data.equalsIgnoreCase("close"))
       lock.Close();
   }
+#endif
 
   // DoorHandler interface
 
   virtual void OnOpen()
   {
     low.Start(0, 100, 900);
-    timer.Start(1, 1000 * 60 * 5);
+    timer.Start(1, 1000);
   }
 
   virtual void OnClose()
@@ -122,7 +133,6 @@ public:
   virtual void Init()
   {
     Log("door->init");
-    
   }
   
   virtual void Action()
@@ -137,11 +147,13 @@ public:
 
   // ModemHandler interface
 
-  virtual void OnReceive(const char* data)
+  virtual void OnReceive(const String& data)
   {
-    Serial.print("Recieved data: \'");
+#ifdef DEBUG
+    Serial.print("Modem: \'");
     Serial.print(data);
     Serial.println("\'");
+#endif
   }
 
 private:
@@ -150,9 +162,13 @@ private:
   Pulse timer;
   Modem modem;
   LockSensor lock;
+#ifdef DEBUG
   bool sendingToModem;
   static char buf_[COM_BUF_LEN + 1];
   uint8_t pos_;
+#endif
 };
 
+#ifdef DEBUG
 static char Door::buf_[COM_BUF_LEN + 1];
+#endif

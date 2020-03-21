@@ -8,7 +8,7 @@
 class ModemHandler
 {
 public:
-  virtual void OnReceive(const char* data) = 0;
+  virtual void OnReceive(const String& data) = 0;
 };
 
 class Modem
@@ -25,6 +25,7 @@ public:
   void Start()
   {
     modem_.begin(9600);
+    Command("ATE0V0+CMEE=1;&W");
   }
 
   void Step()
