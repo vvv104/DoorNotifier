@@ -31,6 +31,9 @@ public:
 
     last_ = current;
 
+    // < 517 - open           513-515
+    // < 544 - 1 turn         517-520
+    //         2 turns        544-547
     const int sensorValue = analogRead(pin_);
     Serial.print("Hall Sensor = " );
     Serial.println(sensorValue);
