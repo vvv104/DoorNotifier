@@ -1,10 +1,14 @@
 #pragma once
 
+enum DoorState
+{
+  dsUnknown, dsOpen, dsLocked1, dsLocked2
+};
+
 class DoorHandler
 {
 public:
-  virtual void OnOpen() = 0;
-  virtual void OnClose() = 0;
+  virtual void OnStateChanged(DoorState state) = 0;
 };
 
 class LockSensor
@@ -12,7 +16,7 @@ class LockSensor
 public:
   LockSensor(DoorHandler* handler)
   : handler_(handler)
-  , isOpen_(false)
+  , state_(dsUnknown)
   , last_(0)
   {
   }
@@ -24,6 +28,9 @@ public:
 
   void Step()
   {
+#ifdef DEBUG
+    return;
+#endif
     const unsigned long current = millis();
 
     if (last_ + timeout_ > current)
@@ -31,34 +38,46 @@ public:
 
     last_ = current;
 
+    const int sensorValue = analogRead(pin_);
+    LogVal("Hall Sensor = ", sensorValue);
+
     // < 517 - open           513-515
     // < 544 - 1 turn         517-520
     //         2 turns        544-547
-    const int sensorValue = analogRead(pin_);
-    Serial.print("Hall Sensor = " );
-    Serial.println(sensorValue);
-  }
-  
-  void Open()
-  {
-    isOpen_ = true;
-    handler_->OnOpen();
-  }
-
-  void Close()
-  {
-    isOpen_ = false;
-    handler_->OnClose();
+    if (sensorValue < 512)
+      SetState(dsUnknown);
+    else if (sensorValue < 517)
+      SetState(dsOpen);
+    else if (sensorValue < 544)
+      SetState(dsLocked1);
+    else if (sensorValue < 548)
+      SetState(dsLocked2);
+    else
+      SetState(dsUnknown);
   }
 
-  bool IsOpen() const
+  void SetState(DoorState state)
   {
-    return isOpen_;
+    if (state_ == state)
+      return;
+
+    state_ = state;
+    handler_->OnStateChanged(state_);
   }
+
+#ifdef DEBUG
+  void Rotate(bool right)
+  {
+    if (right && state_ < dsLocked2)
+      SetState((int)state_ + 1);
+    else if (!right && state_ > dsUnknown)
+      SetState((int)state_ - 1);
+  }
+#endif
 
 private:
   DoorHandler* handler_;
-  bool isOpen_;
+  DoorState state_;
   unsigned long last_;
   static const uint8_t pin_;
   static const unsigned int timeout_;

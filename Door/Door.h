@@ -109,25 +109,17 @@ public:
 
   void OnCommand(const String& data)
   {
-    if (data.equalsIgnoreCase("open"))
-      lock.Open();
-    else if (data.equalsIgnoreCase("close"))
-      lock.Close();
+    if (data == "+")
+      lock.Rotate(true);
+    else if (data == "-")
+      lock.Rotate(false);
   }
 #endif
 
   // DoorHandler interface
-
-  virtual void OnOpen()
+  void OnStateChanged(DoorState state)
   {
-    low.Start(0, 100, 900);
-    timer.Start(1, 1000);
-  }
-
-  virtual void OnClose()
-  {
-    low.Stop();
-    timer.Stop();
+    LogVal("Door state: ", state)
   }
 
   // PulseHandler interface
@@ -151,11 +143,7 @@ public:
 
   virtual void OnReceive(const String& data)
   {
-#ifdef DEBUG
-    Serial.print("Modem: \'");
-    Serial.print(data);
-    Serial.println("\'");
-#endif
+    LogVal("Modem: ", data);
   }
 
 private:
