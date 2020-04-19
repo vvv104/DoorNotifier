@@ -5,12 +5,12 @@
 #include "Pulse.h"
 #include "Modem.h"
 #include "LockSensor.h"
-
-#ifdef DEBUG
-#define COM_BUF_LEN 31
-#endif
+#include "CommandProcessor.h"
 
 class Door : public DoorHandler, public PulseHandler, public ModemHandler
+#ifdef DEBUG
+    , public CommandHandler
+#endif
 {
 public:
   Door()
@@ -20,22 +20,18 @@ public:
   , timer(this)
   , modem(this)
 #ifdef DEBUG
-  , sendingToModem(false)
-  , pos_(0)
+  , command(&modem, this)
 #endif
   {
-#ifdef DEBUG
-    buf_[COM_BUF_LEN] = 0;
-#endif
   }
 
   void Start()
   {
 #ifdef DEBUG
-    Serial.begin(9600);
+    command.Start();
 #endif
-    lock.Start();
     modem.Start();
+    lock.Start();
     b.Start();
     beeper(7040).Beep(100);
   }
@@ -50,62 +46,12 @@ public:
     b.Step();
     beep.Step();
 #ifdef DEBUG
-    ProcessSerial();
+    command.Step();
 #endif
   }
 
 #ifdef DEBUG
-  void ProcessSerial()
-  {
-    int data;
-    int len = Serial.available();
-
-    for (int i = 0; i < len; ++i)
-    {
-      data = Serial.read();
-
-      if (data == -1)
-        break;
-
-      if (data == '\r' || data == '\n' || data == 0)
-      {
-        if (sendingToModem)
-        {
-          modem.Write('\r');
-          modem.Write('\n');
-          sendingToModem = false;
-          continue;
-        }
-
-        if (pos_)
-        {
-          buf_[pos_] = 0;
-          OnCommand(buf_);
-          pos_ = 0;
-        }
-        
-        continue;
-      }
-
-      if (sendingToModem)
-      {
-          modem.Write(data);
-          continue;
-      }
-
-      if (pos_ < COM_BUF_LEN)
-        buf_[pos_++] = data;
-
-      if (pos_ == 2 && (buf_[0] == 'a' || buf_[0] == 'A') && (buf_[1] == 't' || buf_[1] == 'T'))
-      {
-        pos_ = 0;
-        modem.Write(buf_[0]);
-        modem.Write(buf_[1]);
-        sendingToModem = true;
-      }
-    }
-  }
-
+  // CommandHandler interface
   void OnCommand(const String& data)
   {
     if (data == "+")
@@ -185,8 +131,6 @@ private:
   Modem modem;
   LockSensor lock;
 #ifdef DEBUG
-  bool sendingToModem;
-  char buf_[COM_BUF_LEN + 1];
-  uint8_t pos_;
+  CommandProcessor command;
 #endif
 };
