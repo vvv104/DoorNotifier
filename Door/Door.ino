@@ -1,6 +1,6 @@
 #include "Door.h"
 
-Door door;
+static Door door;
 
 void setup()
 {

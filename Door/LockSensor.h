@@ -16,7 +16,7 @@ class LockSensor
 public:
   LockSensor(DoorHandler* handler)
   : handler_(handler)
-  , state_(dsUnknown)
+  , state_(dsOpen)
   , last_(0)
   {
   }

@@ -2,16 +2,15 @@
 
 #include "PulseHandler.h"
 
+#define RED_LED_PIN 3
+#define GREEN_LED_PIN 5
+#define BLUE_LED_PIN 6
+
 class Led : public PulseHandler
 {
 public:
-  enum Color
-  {
-    Red, Green, Blue
-  };
-
-  Led(Color color)
-  : pin_(ColorToPin(color))
+  Led(uint8_t pin)
+  : pin_(pin)
   , status_(false)
   {
     pinMode(pin_, OUTPUT);
@@ -37,21 +36,8 @@ public:
 private:
   uint8_t pin_;
   bool status_;
-  static const uint8_t pins_[3];
-
-  static uint8_t ColorToPin(Color color)
-  {
-    switch (color)
-    {
-      case Red:
-        return pins_[0];
-      case Green:
-        return pins_[1];
-      case Blue:
-        return pins_[2];
-    }
-    return 0;
-  }
 };
 
-static const uint8_t Led::pins_[3] = {3, 5, 6};
+static Led red(RED_LED_PIN);
+static Led green(GREEN_LED_PIN);
+static Led blue(BLUE_LED_PIN);

@@ -14,8 +14,8 @@ class Door : public DoorHandler, public PulseHandler, public ModemHandler
 {
 public:
   Door()
-  : r(new Led(Led::Red)), g(new Led(Led::Green)), b(new Led(Led::Blue))
-  , hi(new Beeper(7040)), low(new Beeper(2000))
+  : r(&red), g(&green), b(&blue)
+  , beep(&beeper)
   , lock(this)
   , timer(this)
   , modem(this)
@@ -36,8 +36,8 @@ public:
 #endif
     lock.Start();
     modem.Start();
-    //g.Start();
-    hi.Start(1, 100);
+    b.Start();
+    beeper(7040).Beep(100);
   }
 
   void Step()
@@ -48,8 +48,7 @@ public:
     r.Step();
     g.Step();
     b.Step();
-    hi.Step();
-    low.Step();
+    beep.Step();
 #ifdef DEBUG
     ProcessSerial();
 #endif
@@ -120,6 +119,39 @@ public:
   void OnStateChanged(DoorState state)
   {
     LogVal("Door state: ", state)
+
+    switch (state)
+    {
+      case dsOpen:
+        g.Stop();
+        b.Stop();
+        r.Start(0, 500, 500);
+        beeper(2637).Beep(250);
+        timer.Start(1, 1000, 2000);
+        break;
+      case dsLocked1:
+        r.Stop();
+        b.Stop();
+        g.Start(0, 500, 500);
+        beeper(2093).Beep(250);
+        timer.Stop();
+        break;
+      case dsLocked2:
+        r.Stop();
+        b.Stop();
+        g.Start(0, 100, 4900);
+        beeper(1760).Beep(250);
+        timer.Stop();
+        break;
+      case dsUnknown:
+      default:
+        g.Stop();
+        b.Stop();
+        r.Start();
+        beeper(3520).Beep(250);
+        timer.Start(1, 1000, 2000);
+        break;
+    }
   }
 
   // PulseHandler interface
@@ -148,17 +180,13 @@ public:
 
 private:
   Pulse r, g, b;
-  Pulse hi, low;
+  Pulse beep;
   Pulse timer;
   Modem modem;
   LockSensor lock;
 #ifdef DEBUG
   bool sendingToModem;
-  static char buf_[COM_BUF_LEN + 1];
+  char buf_[COM_BUF_LEN + 1];
   uint8_t pos_;
 #endif
 };
-
-#ifdef DEBUG
-static char Door::buf_[COM_BUF_LEN + 1];
-#endif

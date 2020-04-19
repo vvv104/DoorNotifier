@@ -2,39 +2,51 @@
 
 #include "PulseHandler.h"
 
+#define BEEPER_PIN 2
+
 class Beeper : public PulseHandler
 {
 public:
-  Beeper(unsigned int freq)
-  : freq_(freq)
-  , status_(false)
+  Beeper()
+  : status_(false)
+  , frequency_(0)
   {
   }
 
   virtual void Init()
   {
     status_ = true;
-    tone(pin_, freq_);
+    tone(BEEPER_PIN, frequency_);
   }
   
   virtual void Action()
   {
     status_ = !status_;
     if (status_)
-      tone(pin_, freq_);
+      tone(BEEPER_PIN, frequency_);
     else
-      noTone(pin_);
+      noTone(BEEPER_PIN);
   }
   
   virtual void Finish()
   {
-    noTone(pin_);
+    noTone(BEEPER_PIN);
+  }
+
+  void Beep(unsigned long duration = 0) const
+  {
+    tone(BEEPER_PIN, frequency_, duration);
+  }
+
+  const Beeper& operator()(unsigned int frequency)
+  {
+    frequency_ = frequency;
+    return *this;
   }
 
 private:
-  unsigned int freq_;
   bool status_;
-  static const uint8_t pin_;
+  unsigned int frequency_;
 };
 
-static const uint8_t Beeper::pin_ = 2;
+static Beeper beeper;

@@ -3,6 +3,8 @@
 #include <SoftwareSerial.h>
 #include "Debug.h"
 
+#define MODEM_RX_PIN 8
+#define MODEM_TX_PIN 9
 #define MDM_BUF_LEN 127
 
 class ModemHandler
@@ -16,7 +18,7 @@ class Modem
 public:
   Modem(ModemHandler* handler)
   : handler_(handler)
-  , modem_(rx_, tx_)
+  , modem_(MODEM_RX_PIN, MODEM_TX_PIN)
   , pos_(0)
   {
     buf_[MDM_BUF_LEN] = 0;
@@ -78,12 +80,6 @@ public:
 private:
   ModemHandler* handler_;
   SoftwareSerial modem_;
-  static const uint8_t rx_;
-  static const uint8_t tx_;
-  static char buf_[MDM_BUF_LEN + 1];
+  char buf_[MDM_BUF_LEN + 1];
   uint8_t pos_;
 };
-
-static const uint8_t Modem::rx_ = 8;
-static const uint8_t Modem::tx_ = 9;
-static char Modem::buf_[MDM_BUF_LEN + 1];
