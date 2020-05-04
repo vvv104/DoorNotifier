@@ -18,7 +18,8 @@ public:
   , beep(&beeper)
   , lock(this)
   , timer(this)
-  , modem(this)
+  , parser(this)
+  , modem(&parser)
 #ifdef DEBUG
   , command(&modem, this)
 #endif
@@ -118,16 +119,22 @@ public:
   }
 
   // ModemHandler interface
-
-  virtual void OnReceive(const String& data)
+  
+  virtual void CallSuccess()
   {
-    LogVal("Modem: ", data);
+    
+  }
+  
+  virtual void CallFailure()
+  {
+    
   }
 
 private:
   Pulse r, g, b;
   Pulse beep;
   Pulse timer;
+  ModemParser parser;
   Modem modem;
   LockSensor lock;
 #ifdef DEBUG

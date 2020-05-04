@@ -1,23 +1,17 @@
 #pragma once
 
 #include <SoftwareSerial.h>
-#include "Debug.h"
+#include "ModemParser.h"
 
 #define MODEM_RX_PIN 8
 #define MODEM_TX_PIN 9
 #define MDM_BUF_LEN 127
 
-class ModemHandler
-{
-public:
-  virtual void OnReceive(const String& data) = 0;
-};
-
 class Modem
 {
 public:
-  Modem(ModemHandler* handler)
-  : handler_(handler)
+  Modem(ModemParser* parser)
+  : parser_(parser)
   , modem_(MODEM_RX_PIN, MODEM_TX_PIN)
   , pos_(0)
   {
@@ -27,7 +21,7 @@ public:
   void Start()
   {
     modem_.begin(9600);
-    Command("ATE0V0+CMEE=1;&W");
+    Command("ATE0V0+CMEE=1;+CLCC=1;&W");
   }
 
   void Step()
@@ -50,7 +44,7 @@ public:
         if (pos_)
         {
           buf_[pos_] = 0;
-          handler_->OnReceive(buf_);
+          parser_->OnReceive(buf_);
           pos_ = 0;
         }
 
@@ -62,7 +56,7 @@ public:
 
     if (pos_ == MDM_BUF_LEN)
     {
-      handler_->OnReceive(buf_);
+      parser_->OnReceive(buf_);
       pos_ = 0;
     }
   }
@@ -78,7 +72,7 @@ public:
   }
 
 private:
-  ModemHandler* handler_;
+  ModemParser* parser_;
   SoftwareSerial modem_;
   char buf_[MDM_BUF_LEN + 1];
   uint8_t pos_;

@@ -1,3 +1,4 @@
+#include "Debug.h"
 #include "Door.h"
 
 static Door door;
