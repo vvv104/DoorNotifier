@@ -10,8 +10,8 @@
 class Modem
 {
 public:
-  Modem(ModemParser* parser)
-  : parser_(parser)
+  Modem(ModemHandler* handler)
+  : parser_(handler)
   , modem_(MODEM_RX_PIN, MODEM_TX_PIN)
   , pos_(0)
   {
@@ -44,7 +44,7 @@ public:
         if (pos_)
         {
           buf_[pos_] = 0;
-          parser_->OnReceive(buf_);
+          parser_.OnReceive(buf_);
           pos_ = 0;
         }
 
@@ -56,7 +56,7 @@ public:
 
     if (pos_ == MDM_BUF_LEN)
     {
-      parser_->OnReceive(buf_);
+      parser_.OnReceive(buf_);
       pos_ = 0;
     }
   }
@@ -72,7 +72,7 @@ public:
   }
 
 private:
-  ModemParser* parser_;
+  ModemParser parser_;
   SoftwareSerial modem_;
   char buf_[MDM_BUF_LEN + 1];
   uint8_t pos_;

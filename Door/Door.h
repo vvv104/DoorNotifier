@@ -18,8 +18,7 @@ public:
   , beep(&beeper)
   , lock(this)
   , timer(this)
-  , parser(this)
-  , modem(&parser)
+  , modem(this)
 #ifdef DEBUG
   , command(&modem, this)
 #endif
@@ -134,7 +133,6 @@ private:
   Pulse r, g, b;
   Pulse beep;
   Pulse timer;
-  ModemParser parser;
   Modem modem;
   LockSensor lock;
 #ifdef DEBUG
