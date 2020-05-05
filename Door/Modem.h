@@ -7,11 +7,11 @@
 #define MODEM_TX_PIN 9
 #define MDM_BUF_LEN 127
 
-class Modem
+class Modem : public ModemCommand
 {
 public:
   Modem(ModemHandler* handler)
-  : parser_(handler)
+  : parser_(handler, this)
   , modem_(MODEM_RX_PIN, MODEM_TX_PIN)
   , pos_(0)
   {
@@ -61,7 +61,8 @@ public:
     }
   }
 
-  void Command(const char* cmd)
+  // ModemCommand interface
+  virtual void Command(const char* cmd)
   {
     modem_.println(cmd);
   }

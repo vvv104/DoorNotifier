@@ -7,11 +7,18 @@ public:
   virtual void CallFailure() = 0;
 };
 
+class ModemCommand
+{
+public:
+  virtual void Command(const char* cmd) = 0;
+};
+
 class ModemParser
 {
 public:
-  ModemParser(ModemHandler* handler)
+  ModemParser(ModemHandler* handler, ModemCommand* command)
   : handler_(handler)
+  , command_(command)
   {
   }
 
@@ -22,4 +29,5 @@ public:
 
 private:
   ModemHandler* handler_;
+  ModemCommand* command_;
 };
