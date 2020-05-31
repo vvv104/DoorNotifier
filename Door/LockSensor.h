@@ -56,15 +56,6 @@ public:
       SetState(dsUnknown);
   }
 
-  void SetState(DoorState state)
-  {
-    if (state_ == state)
-      return;
-
-    state_ = state;
-    handler_->OnStateChanged(state_);
-  }
-
 #ifdef DEBUG
   void Rotate(bool right)
   {
@@ -74,6 +65,21 @@ public:
       SetState((int)state_ - 1);
   }
 #endif
+
+  DoorState GetState() const
+  {
+    return state_;
+  }
+
+private:
+  void SetState(DoorState state)
+  {
+    if (state_ == state)
+      return;
+
+    state_ = state;
+    handler_->OnStateChanged(state_);
+  }
 
 private:
   DoorHandler* handler_;

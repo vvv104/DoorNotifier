@@ -21,7 +21,7 @@ public:
   void Start()
   {
     modem_.begin(9600);
-    Command("ATE0V0+CMEE=1;+CLCC=1;&W");
+    Command("ATE0V0+CMEE=1;+CLCC=1;+CLTS=1;&W");
   }
 
   void Step()
@@ -61,16 +61,51 @@ public:
     }
   }
 
+  void Call(const char* number)
+  {
+    if (number == nullptr)
+      return;
+      
+    if (parser_.IsCalling())
+    {
+      Log("Already calling");
+      return;
+    }
+
+    LogVal("Calling: ", number);
+    parser_.Calling(true);
+
+    char buf[17]; // ATD+70123456789;\0
+    strcpy(buf, "ATD+7");
+    strncat(buf, number, 10);
+    strcat(buf, ";");
+    Command(buf);
+  }
+
+  void CancelCall()
+  {
+    if (!parser_.IsCalling())
+    {
+      Log("Not calling");
+      return;
+    }
+
+    Command("ATH");
+    parser_.Calling(false);
+  }
+
   // ModemCommand interface
   virtual void Command(const char* cmd)
   {
     modem_.println(cmd);
   }
 
+#ifdef DEBUG
   void Write(uint8_t b)
   {
     modem_.write(b);
   }
+#endif
 
 private:
   ModemParser parser_;

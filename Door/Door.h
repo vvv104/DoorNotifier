@@ -6,6 +6,8 @@
 #include "Modem.h"
 #include "LockSensor.h"
 #include "CommandProcessor.h"
+#include "Numbers.h"
+#include "Time.h"
 
 class Door : public DoorHandler, public PulseHandler, public ModemHandler
 #ifdef DEBUG
@@ -66,36 +68,34 @@ public:
   {
     LogVal("Door state: ", state)
 
+    timer.Stop();
+    r.Stop();
+    g.Stop();
+    b.Stop();
+    beep.Stop();
+    modem.CancelCall();
+
     switch (state)
     {
       case dsOpen:
-        g.Stop();
-        b.Stop();
         r.Start(0, 500, 500);
         beeper(2637).Beep(250);
-        timer.Start(1, 1000, 2000);
+        timer.Start(5, 1 * secs);
         break;
       case dsLocked1:
-        r.Stop();
-        b.Stop();
         g.Start(0, 500, 500);
         beeper(2093).Beep(250);
-        timer.Stop();
+        timer.Start(2, 10 * secs);
         break;
       case dsLocked2:
-        r.Stop();
-        b.Stop();
         g.Start(0, 100, 4900);
         beeper(1760).Beep(250);
-        timer.Stop();
         break;
       case dsUnknown:
       default:
-        g.Stop();
-        b.Stop();
         r.Start();
         beeper(3520).Beep(250);
-        timer.Start(1, 1000, 2000);
+        timer.Start(5, 1 * secs);
         break;
     }
   }
@@ -110,6 +110,12 @@ public:
   virtual void Action(unsigned int step)
   {
     LogVal("door->action", step);
+
+    if (step == 1)
+      beep.Start(0, 500, 500);
+
+//    if (step >= 2)
+//      modem.Call(numbers[0]);
   }
   
   virtual void Finish()
@@ -121,7 +127,7 @@ public:
   
   virtual void CallSuccess()
   {
-    
+    timer.Stop();
   }
   
   virtual void CallFailure()
