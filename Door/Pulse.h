@@ -46,7 +46,7 @@ public:
       return;
     }
 
-    handler_->Action();
+    handler_->Action(step_);
   }
 
   void Stop()

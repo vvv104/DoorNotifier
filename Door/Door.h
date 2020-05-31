@@ -107,9 +107,9 @@ public:
     Log("door->init");
   }
   
-  virtual void Action()
+  virtual void Action(unsigned int step)
   {
-    Log("door->action");
+    LogVal("door->action", step);
   }
   
   virtual void Finish()

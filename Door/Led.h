@@ -11,31 +11,27 @@ class Led : public PulseHandler
 public:
   Led(uint8_t pin)
   : pin_(pin)
-  , status_(false)
   {
     pinMode(pin_, OUTPUT);
   }
 
   virtual void Init()
   {
-    status_ = true;
-    digitalWrite(pin_, status_);
+    digitalWrite(pin_, HIGH);
   }
   
-  virtual void Action()
+  virtual void Action(unsigned int step)
   {
-    status_ = !status_;
-    digitalWrite(pin_, status_);
+    digitalWrite(pin_, step % 2 ? LOW : HIGH);
   }
   
   virtual void Finish()
   {
-    digitalWrite(pin_, false);
+    digitalWrite(pin_, LOW);
   }
 
 private:
   uint8_t pin_;
-  bool status_;
 };
 
 static Led red(RED_LED_PIN);
