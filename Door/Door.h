@@ -54,11 +54,14 @@ public:
 
 #ifdef DEBUG
   // CommandHandler interface
-  void OnCommand(const String& data)
+  void OnCommand(const char* data)
   {
-    if (data == "+")
+    if (data == nullptr)
+      return;
+      
+    if (strcmp(data, "+") == 0)
       lock.Rotate(true);
-    else if (data == "-")
+    else if (strcmp(data, "-") == 0)
       lock.Rotate(false);
   }
 #endif

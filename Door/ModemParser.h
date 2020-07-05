@@ -23,7 +23,7 @@ public:
   {
   }
 
-  void OnReceive(const String& data)
+  void OnReceive(const char* data)
   {
     LogVal("Modem: ", data);
     //if ()

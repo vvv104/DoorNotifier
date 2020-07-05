@@ -6,7 +6,7 @@
 class CommandHandler
 {
 public:
-  virtual void OnCommand(const String& data) = 0;
+  virtual void OnCommand(const char* data) = 0;
 };
 
 class CommandProcessor
