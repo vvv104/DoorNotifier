@@ -26,7 +26,11 @@ public:
   void OnReceive(const char* data)
   {
     LogVal("Modem: ", data);
-    //if ()
+    if (data[0] == '+')
+    {
+      UnsolicRC(data + 1);
+      return;
+    }
   }
 
   bool IsCalling() const
@@ -40,6 +44,11 @@ public:
   }
 
 private:
+  void UnsolicRC(const char* rc)
+  {
+    
+  }
+  
   ModemHandler* handler_;
   ModemCommand* command_;
   bool isCalling;
