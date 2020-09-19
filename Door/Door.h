@@ -56,9 +56,6 @@ public:
   // CommandHandler interface
   void OnCommand(const char* data)
   {
-    if (data == nullptr)
-      return;
-      
     if (strcmp(data, "+") == 0)
       lock.Rotate(true);
     else if (strcmp(data, "-") == 0)

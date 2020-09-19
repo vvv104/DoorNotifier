@@ -63,9 +63,6 @@ public:
 
   void Call(const char* number)
   {
-    if (number == nullptr)
-      return;
-      
     if (parser_.IsCalling())
     {
       Log("Already calling");
